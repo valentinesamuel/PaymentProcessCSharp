@@ -12,3 +12,4 @@
 /Users/valentinesamuel/Desktop/csharpprojects/PaymentProcessor/obj/Debug/net10.0/PaymentProcessor.pdb
 /Users/valentinesamuel/Desktop/csharpprojects/PaymentProcessor/obj/Debug/net10.0/PaymentProcessor.genruntimeconfig.cache
 /Users/valentinesamuel/Desktop/csharpprojects/PaymentProcessor/obj/Debug/net10.0/ref/PaymentProcessor.dll
+/Users/valentinesamuel/Desktop/csharpprojects/PaymentProcessor/obj/Debug/net10.0/PaymentProcessor.sourcelink.json

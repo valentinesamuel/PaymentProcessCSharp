@@ -12,6 +12,8 @@ public record GetPaymentsFilter(
 
 public interface IPaymentService
 {
+    Payment CreatePayment(string customerId, decimal amount, string currency, PaymentMethod paymentMethod,
+        PaymentStatus status);
     Payment[] GetPayments();
     Payment[] GetPaymentsByFilter(GetPaymentsFilter filter);
     Payment GetPaymentsById(string id);
