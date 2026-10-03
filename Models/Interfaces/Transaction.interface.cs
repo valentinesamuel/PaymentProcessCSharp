@@ -11,9 +11,9 @@ public record GetTransactionsFilter(
 
 public interface ITransactionService
 {
+    Transaction CreateTransaction(Payment payment);
     Transaction[] GetTransactions();
     Transaction[] GetTransactionsByFilter(GetPaymentsFilter filter);
-    Transaction GetTransactionsById(string id);
-    Transaction[] GetTransactionsByPaymentId(string paymentId);
-    Transaction[] GetTransactionsWithinRange(DateTime startDate, DateTime endDate);
+    Transaction? GetTransactionById(string id);
+    Transaction? GetTransactionByPaymentId(string paymentId);
 }

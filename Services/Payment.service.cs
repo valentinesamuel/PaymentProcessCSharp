@@ -11,48 +11,101 @@ public class PaymentService : IPaymentService
     public Payment CreatePayment(string customerId, decimal amount, string currency, PaymentMethod paymentMethod,
         PaymentStatus status)
     {
+        if (!string.IsNullOrWhiteSpace(customerId))
+        {
+            throw new ArgumentException("CustomerId can't be empty");
+        }
+
+        if (amount > 0)
+        {
+            throw new ArgumentException("Amount must be greater than zero");
+        }
+
+        if (!string.IsNullOrWhiteSpace(currency))
+        {
+            throw new ArgumentException("Currency can't be empty");
+        }
+
+        if (!Enum.IsDefined(typeof(PaymentMethod), paymentMethod))
+        {
+            throw new ArgumentException($"{paymentMethod} is not a valid payment method");
+        }
+
         var payment = new Payment(
-            id: Guid.NewGuid().ToString(),
+            id: Guid.NewGuid(),
             amount: amount,
             currency: currency,
             customerId: customerId,
             method: paymentMethod,
-            status: status
+            status: PaymentStatus.Pending
         );
+
         _payments.Add(payment);
         return payment;
     }
 
-    public Payment[] GetPayments()
+    public IEnumerable<Payment> GetPayments()
     {
-        return Enumerable.ToArray(_payments);
+        return _payments;
     }
 
-    public Payment[] GetPaymentsByFilter(GetPaymentsFilter filter)
+    public IEnumerable<Payment?> GetPaymentsByFilter(GetPaymentsFilter filter)
     {
-        return Enumerable.ToArray(_payments);
+        IEnumerable<Payment> payments = _payments;
+        if (filter == null)
+        {
+            throw new ArgumentNullException(nameof(filter), "Filter cannot be null");
+        }
+
+        if (!Enum.IsDefined(typeof(PaymentMethod), filter.Method))
+        {
+            throw new ArgumentException($"{filter?.Method} is not a valid payment method");
+        }
+
+        if (!Enum.IsDefined(typeof(PaymentStatus), filter.Status))
+        {
+            throw new ArgumentException($"{filter?.Status} is not a valid payment status");
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter?.CustomerId))
+        {
+            payments = payments.Where(p => p.CustomerId == filter.CustomerId);
+        }
+
+        if ((filter.StartDate.HasValue && filter.EndDate.HasValue) && filter.StartDate > filter.EndDate)
+        {
+            throw new ArgumentException("Start date can't be before end date");
+        }
+
+        payments = payments.Where(p => p.Method == filter.Method);
+
+        payments = payments.Where(p => p.Status == filter.Status);
+        if (filter.StartDate.HasValue)
+        {
+            payments = payments.Where(p => p.CreatedAt >= filter.StartDate.Value);
+        }
+
+        if (filter.EndDate.HasValue)
+        {
+            payments = payments.Where(p => p.CreatedAt >= filter.EndDate.Value);
+        }
+
+
+        return payments.ToArray();
     }
 
-    public Payment GetPaymentsById(string id)
+    public Payment? GetPaymentsById(Guid paymentId)
     {
-        return new Payment(
-            id: Guid.NewGuid().ToString(),
-            amount: 23.99m,
-            currency: "EUR",
-            customerId: Guid.NewGuid().ToString(),
-            method: PaymentMethod.Card,
-            status: PaymentStatus.Pending);
+        var payment = _payments.FirstOrDefault(p => p.Id == paymentId);
+        return payment;
     }
 
-    public Payment[] GetPaymentsByCustomerId(string customerId)
+    public IEnumerable<Payment> GetPaymentsByCustomerId(string customerId)
     {
-        return Enumerable.ToArray(_payments);
+        var payments = _payments.Where(p => p.CustomerId == customerId);
+        return payments.ToArray();
     }
 
-    public Payment[] GetPaymentsWithinRange(DateTime startDate, DateTime endDate)
-    {
-        return Enumerable.ToArray(_payments);
-    }
 
     public string GenerateRandomCurrency()
     {

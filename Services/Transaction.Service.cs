@@ -8,6 +8,39 @@ public class TransactionService : ITransactionService
 {
     private readonly List<Transaction> _transactions = [];
 
+
+    public Transaction CreateTransaction(Payment payment)
+    {
+        if (payment.Status == PaymentStatus.Pending)
+        {
+            throw new InvalidOperationException("Cannot create a transaction with a pending payment");
+        }
+
+        if (!string.IsNullOrWhiteSpace(payment.CustomerId))
+        {
+            throw new InvalidOperationException("Cannot create a transaction without a customer id");
+        }
+
+        if (!string.IsNullOrWhiteSpace(payment.Currency))
+        {
+            throw new InvalidOperationException("Cannot create a transaction without a currency");
+        }
+
+        if (payment.Amount <= 0)
+        {
+            throw new InvalidOperationException("Cannot create a transaction with 0 or  negative amount");
+        }
+
+        newTrnx = new Transaction(
+            id: Guid.NewGuid().ToString(),
+            paymentId: payment.Id,
+            amount: payment.Amount,
+            currency: payment.Currency,
+            status: payment.Status,
+            transactionDate: DateTime.Now
+        )
+    }
+
     public Transaction[] GetTransactions()
     {
         return Enumerable.ToArray(_transactions);
@@ -18,23 +51,15 @@ public class TransactionService : ITransactionService
         return Enumerable.ToArray(_transactions);
     }
 
-    public Transaction GetTransactionsById(string id)
+    public Transaction? GetTransactionById(string id)
     {
-        return new Transaction(
-            id: Guid.NewGuid().ToString(),
-            paymentId: "2309303435",
-            status: TransactionStatus.Pending,
-            transactionDate: new DateTime(2024, 8, 1, 0, 0, 0, DateTimeKind.Utc)
-        );
+        var transaction = _transactions.FirstOrDefault(t => t.Id == id);
+        return transaction;
     }
 
-    public Transaction[] GetTransactionsByPaymentId(string paymentId)
+    public Transaction? GetTransactionByPaymentId(string paymentId)
     {
-        return Enumerable.ToArray(_transactions);
-    }
-
-    public Transaction[] GetTransactionsWithinRange(DateTime startDate, DateTime endDate)
-    {
-        return Enumerable.ToArray(_transactions);
+        var transaction = _transactions.FirstOrDefault(t => t.PaymentId == paymentId);
+        return transaction;
     }
 }

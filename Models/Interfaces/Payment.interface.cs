@@ -14,9 +14,9 @@ public interface IPaymentService
 {
     Payment CreatePayment(string customerId, decimal amount, string currency, PaymentMethod paymentMethod,
         PaymentStatus status);
-    Payment[] GetPayments();
-    Payment[] GetPaymentsByFilter(GetPaymentsFilter filter);
-    Payment GetPaymentsById(string id);
-    Payment[] GetPaymentsByCustomerId(string customerId);
-    Payment[] GetPaymentsWithinRange(DateTime startDate, DateTime endDate);
+
+    IEnumerable<Payment> GetPayments();
+    IEnumerable<Payment?> GetPaymentsByFilter(GetPaymentsFilter filter);
+    Payment? GetPaymentsById(Guid paymentId);
+    IEnumerable<Payment> GetPaymentsByCustomerId(string customerId);
 }

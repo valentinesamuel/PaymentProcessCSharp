@@ -5,11 +5,14 @@ public enum PaymentStatus
     Pending,
     Completed,
     Failed,
+    Processing,
+    Cancelled,
 }
 
 public enum PaymentMethod
 {
     Cash,
-    P2P,
+    Transfer,
+    Wallet,
     Card,
 }
