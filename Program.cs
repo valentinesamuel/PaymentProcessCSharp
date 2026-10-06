@@ -29,5 +29,10 @@ paymentService.CreatePayment(customerId: Guid.NewGuid().ToString(), amount: paym
 var payments = paymentService.GetPayments();
 foreach (var payment in payments)
 {
-    Console.WriteLine(payment.ToString());
+    Console.WriteLine(payment);
 }
+// var trnx = transactionService.GetTransactions();
+// foreach (var tr in trnx)
+// {
+//     Console.WriteLine(tr.ToString());
+// }

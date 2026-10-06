@@ -2,6 +2,7 @@ using PaymentProcessor.Models.Entities;
 using PaymentProcessor.Models.Enums;
 using PaymentProcessor.Models.Interfaces;
 
+
 namespace PaymentProcessor.Services;
 
 public class PaymentService : IPaymentService
@@ -11,17 +12,17 @@ public class PaymentService : IPaymentService
     public Payment CreatePayment(string customerId, decimal amount, string currency, PaymentMethod paymentMethod,
         PaymentStatus status)
     {
-        if (!string.IsNullOrWhiteSpace(customerId))
+        if (string.IsNullOrWhiteSpace(customerId))
         {
             throw new ArgumentException("CustomerId can't be empty");
         }
 
-        if (amount > 0)
+        if (amount < 0)
         {
             throw new ArgumentException("Amount must be greater than zero");
         }
 
-        if (!string.IsNullOrWhiteSpace(currency))
+        if (string.IsNullOrWhiteSpace(currency))
         {
             throw new ArgumentException("Currency can't be empty");
         }
@@ -52,23 +53,24 @@ public class PaymentService : IPaymentService
     public IEnumerable<Payment?> GetPaymentsByFilter(GetPaymentsFilter filter)
     {
         IEnumerable<Payment> payments = _payments;
-     
 
+        if (string.IsNullOrWhiteSpace(filter.CustomerId))
+        {
+            throw new ArgumentException("CustomerId can't be empty");
+        }
+
+        payments = payments.Where(p => p.CustomerId == filter.CustomerId);
 
         if (filter.Method.HasValue && !Enum.IsDefined(typeof(PaymentMethod), filter.Method))
         {
-            throw new ArgumentException($"{filter?.Method} is not a valid payment method");
+            throw new ArgumentException($"{filter.Method} is not a valid payment method");
         }
 
         if (filter.Status.HasValue && !Enum.IsDefined(typeof(PaymentStatus), filter.Status))
         {
-            throw new ArgumentException($"{filter?.Status} is not a valid payment status");
+            throw new ArgumentException($"{filter.Status} is not a valid payment status");
         }
 
-        if (!string.IsNullOrWhiteSpace(filter?.CustomerId))
-        {
-            payments = payments.Where(p => p.CustomerId == filter.CustomerId);
-        }
 
         if (filter.StartDate.HasValue && filter.EndDate.HasValue)
         {

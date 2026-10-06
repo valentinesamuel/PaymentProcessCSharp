@@ -1,5 +1,7 @@
-using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using PaymentProcessor.Models.Enums;
+
 
 namespace PaymentProcessor.Models.Entities;
 
@@ -22,4 +24,16 @@ public class Payment(
     public PaymentMethod Method { get; set; } = method;
 
     public PaymentStatus Status { get; set; } = status;
+
+    public override string ToString()
+    {
+        // return JsonSerializer.Serialize(this, new JsonSerializerOptions
+        // {
+        //     WriteIndented = true,
+        //     Converters = { new JsonStringEnumConverter() }
+        // });
+        return $"Id: {Id}, CustomerId: {CustomerId}, " +
+               $"Amount: {Amount}, Currency: {Currency}, " +
+               $"Method: {Method}, Status: {Status}, CreatedAt: {CreatedAt}";
+    }
 }
