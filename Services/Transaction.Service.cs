@@ -9,11 +9,11 @@ public class TransactionService : ITransactionService
     private readonly List<Transaction> _transactions = [];
 
 
-    public Transaction CreateTransaction(Payment payment)
+    public (Transaction debitTrnx, Transaction creditTrnx) CreateTransaction(Payment payment)
     {
-        if (payment.Status == PaymentStatus.Pending)
+        if (payment.Status != PaymentStatus.Completed)
         {
-            throw new InvalidOperationException("Cannot create a transaction with a pending payment");
+            throw new InvalidOperationException("Cannot create a transaction with a non-completed payment");
         }
 
         if (!string.IsNullOrWhiteSpace(payment.CustomerId))
@@ -31,24 +31,69 @@ public class TransactionService : ITransactionService
             throw new InvalidOperationException("Cannot create a transaction with 0 or  negative amount");
         }
 
-        newTrnx = new Transaction(
+
+        var debitTrnx = new Transaction(
             id: Guid.NewGuid().ToString(),
             paymentId: payment.Id,
             amount: payment.Amount,
             currency: payment.Currency,
-            status: payment.Status,
-            transactionDate: DateTime.Now
-        )
+            status: TransactionStatus.Completed,
+            transactionDate: DateTime.Now,
+            type: TransactionType.Debit
+        );
+        var creditTrnx = new Transaction(
+            id: Guid.NewGuid().ToString(),
+            paymentId: payment.Id,
+            amount: payment.Amount,
+            currency: payment.Currency,
+            status: TransactionStatus.Completed,
+            transactionDate: DateTime.Now,
+            type: TransactionType.Credit
+        );
+
+        _transactions.Add(debitTrnx);
+        _transactions.Add(creditTrnx);
+
+        return (debitTrnx, creditTrnx);
     }
 
-    public Transaction[] GetTransactions()
+    public IEnumerable<Transaction> GetTransactions()
     {
         return Enumerable.ToArray(_transactions);
     }
 
-    public Transaction[] GetTransactionsByFilter(GetPaymentsFilter filter)
+    public IEnumerable<Transaction?> GetTransactionsByFilter(GetTransactionsFilter filter)
     {
-        return Enumerable.ToArray(_transactions);
+        IEnumerable<Transaction> transactions = _transactions;
+
+
+        if (filter.Status.HasValue && !Enum.IsDefined(typeof(TransactionStatus), filter.Status))
+        {
+            throw new ArgumentException("Invalid transaction status");
+        }
+
+
+        if (!string.IsNullOrWhiteSpace(filter.PaymentId))
+        {
+            transactions = transactions.Where(t => t.PaymentId == new Guid(filter.PaymentId));
+        }
+
+        if ((filter.StartDate.HasValue && filter.EndDate.HasValue) && filter.StartDate > filter.EndDate)
+        {
+            throw new ArgumentException("Start date can't be before end date");
+        }
+
+        if (filter.StartDate.HasValue)
+        {
+            transactions = transactions.Where(t => t.CreatedAt >= filter.StartDate.Value);
+        }
+
+        if (filter.EndDate.HasValue)
+        {
+            transactions = transactions.Where(t => t.CreatedAt <= filter.EndDate.Value);
+        }
+
+        return transactions.ToArray();
     }
 
     public Transaction? GetTransactionById(string id)
@@ -57,9 +102,9 @@ public class TransactionService : ITransactionService
         return transaction;
     }
 
-    public Transaction? GetTransactionByPaymentId(string paymentId)
+    public Transaction[] GetTransactionByPaymentId(Guid paymentId)
     {
-        var transaction = _transactions.FirstOrDefault(t => t.PaymentId == paymentId);
-        return transaction;
+        var transactions = _transactions.Where(t => t.PaymentId == paymentId);
+        return Enumerable.ToArray(transactions);
     }
 }

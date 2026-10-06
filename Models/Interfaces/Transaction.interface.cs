@@ -11,9 +11,9 @@ public record GetTransactionsFilter(
 
 public interface ITransactionService
 {
-    Transaction CreateTransaction(Payment payment);
-    Transaction[] GetTransactions();
-    Transaction[] GetTransactionsByFilter(GetPaymentsFilter filter);
+    (Transaction debitTrnx, Transaction creditTrnx) CreateTransaction(Payment payment);
+    IEnumerable<Transaction> GetTransactions();
+    IEnumerable<Transaction?> GetTransactionsByFilter(GetTransactionsFilter filter);
     Transaction? GetTransactionById(string id);
-    Transaction? GetTransactionByPaymentId(string paymentId);
+    Transaction[] GetTransactionByPaymentId(Guid paymentId);
 }

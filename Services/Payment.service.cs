@@ -52,17 +52,15 @@ public class PaymentService : IPaymentService
     public IEnumerable<Payment?> GetPaymentsByFilter(GetPaymentsFilter filter)
     {
         IEnumerable<Payment> payments = _payments;
-        if (filter == null)
-        {
-            throw new ArgumentNullException(nameof(filter), "Filter cannot be null");
-        }
+     
 
-        if (!Enum.IsDefined(typeof(PaymentMethod), filter.Method))
+
+        if (filter.Method.HasValue && !Enum.IsDefined(typeof(PaymentMethod), filter.Method))
         {
             throw new ArgumentException($"{filter?.Method} is not a valid payment method");
         }
 
-        if (!Enum.IsDefined(typeof(PaymentStatus), filter.Status))
+        if (filter.Status.HasValue && !Enum.IsDefined(typeof(PaymentStatus), filter.Status))
         {
             throw new ArgumentException($"{filter?.Status} is not a valid payment status");
         }
@@ -72,9 +70,12 @@ public class PaymentService : IPaymentService
             payments = payments.Where(p => p.CustomerId == filter.CustomerId);
         }
 
-        if ((filter.StartDate.HasValue && filter.EndDate.HasValue) && filter.StartDate > filter.EndDate)
+        if (filter.StartDate.HasValue && filter.EndDate.HasValue)
         {
-            throw new ArgumentException("Start date can't be before end date");
+            if (filter.StartDate > filter.EndDate)
+            {
+                throw new ArgumentException("Start date can't be before end date");
+            }
         }
 
         payments = payments.Where(p => p.Method == filter.Method);

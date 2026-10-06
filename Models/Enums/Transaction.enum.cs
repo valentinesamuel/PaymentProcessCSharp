@@ -6,3 +6,9 @@ public enum TransactionStatus
     Completed,
     Failed,
 }
+
+public enum TransactionType
+{
+    Debit,
+    Credit
+}
