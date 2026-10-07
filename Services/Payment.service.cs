@@ -8,6 +8,12 @@ namespace PaymentProcessor.Services;
 public class PaymentService : IPaymentService
 {
     private readonly List<Payment> _payments = [];
+    private readonly ITransactionService _transactionService;
+
+    public PaymentService(ITransactionService transactionService)
+    {
+        _transactionService = transactionService;
+    }
 
     public Payment CreatePayment(string customerId, decimal amount, string currency, PaymentMethod paymentMethod,
         PaymentStatus status)
@@ -38,7 +44,7 @@ public class PaymentService : IPaymentService
             currency: currency,
             customerId: customerId,
             method: paymentMethod,
-            status: PaymentStatus.Pending
+            status: status
         );
 
         _payments.Add(payment);
@@ -109,10 +115,33 @@ public class PaymentService : IPaymentService
         return payments.ToArray();
     }
 
+    public async Task<(Transaction debitTrnx, Transaction creditTrnx)> ProcessPayment(Guid paymentId)
+    {
+        var payment = _payments.FirstOrDefault(p => p.Id == paymentId);
+        if (payment == null)
+        {
+            Console.Error.WriteLine($"Payment with id {paymentId} not found");
+            throw new ArgumentException($"Payment not found");
+        }
+
+        if (!Enum.IsDefined(typeof(PaymentStatus), payment.Status))
+        {
+            throw new ArgumentException($"Payment is not pending");
+        }
+
+        await Task.Delay(Random.Shared.Next(1000, 5000));
+
+        var (debit, credit) = _transactionService.CreateTransaction(payment);
+
+        payment.Status = PaymentStatus.Completed;
+
+
+        return (debit, credit);
+    }
 
     public string GenerateRandomCurrency()
     {
-        string[] currencyList = ["Pending", "Completed", "Failed"];
+        string[] currencyList = ["NGN", "EUR", "USD"];
 
         var randomIndex = Random.Shared.Next(currencyList.Length);
 

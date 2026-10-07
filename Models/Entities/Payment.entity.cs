@@ -27,13 +27,10 @@ public class Payment(
 
     public override string ToString()
     {
-        // return JsonSerializer.Serialize(this, new JsonSerializerOptions
-        // {
-        //     WriteIndented = true,
-        //     Converters = { new JsonStringEnumConverter() }
-        // });
-        return $"Id: {Id}, CustomerId: {CustomerId}, " +
-               $"Amount: {Amount}, Currency: {Currency}, " +
-               $"Method: {Method}, Status: {Status}, CreatedAt: {CreatedAt}";
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Converters = { new JsonStringEnumConverter() }
+        });
     }
 }

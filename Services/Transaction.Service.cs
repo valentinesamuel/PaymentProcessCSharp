@@ -13,15 +13,11 @@ public class TransactionService : ITransactionService
     {
         if (payment.Status != PaymentStatus.Completed)
         {
-            throw new InvalidOperationException("Cannot create a transaction with a non-completed payment");
+            throw new InvalidOperationException(
+                $"Cannot create a transaction with a non-completed payment using {payment.Status}");
         }
-
-        if (!string.IsNullOrWhiteSpace(payment.CustomerId))
-        {
-            throw new InvalidOperationException("Cannot create a transaction without a customer id");
-        }
-
-        if (!string.IsNullOrWhiteSpace(payment.Currency))
+        
+        if (string.IsNullOrWhiteSpace(payment.Currency))
         {
             throw new InvalidOperationException("Cannot create a transaction without a currency");
         }

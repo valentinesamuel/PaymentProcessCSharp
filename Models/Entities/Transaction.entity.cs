@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using PaymentProcessor.Models.Enums;
 
 namespace PaymentProcessor.Models.Entities;
@@ -22,4 +24,13 @@ public class Transaction(
     public DateTime CreatedAt { get; } = new DateTime();
     public DateTime CompletedAt { get; set; }
     public string FailureReason { get; set; } = string.Empty;
+    
+    public override string ToString()
+    {
+        return JsonSerializer.Serialize(this, new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Converters = { new JsonStringEnumConverter() }
+        });
+    }
 }

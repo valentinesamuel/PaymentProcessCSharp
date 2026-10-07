@@ -19,4 +19,5 @@ public interface IPaymentService
     IEnumerable<Payment?> GetPaymentsByFilter(GetPaymentsFilter filter);
     Payment? GetPaymentsById(Guid paymentId);
     IEnumerable<Payment> GetPaymentsByCustomerId(string customerId);
+    Task<(Transaction debitTrnx, Transaction creditTrnx)> ProcessPayment(Guid paymentId);
 }
